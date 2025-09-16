@@ -4,7 +4,8 @@ The first cell is pip installations because my computer doesn't have these packa
 
 The second cell is for importing these libraries for the rest of the cells
 
-To be fair for this project, I wasn't familiar with the nltk library so I had to look at some resources for better understanding.
+To be fair for this project, I wasn't familiar with the nltk library or the wordcloud library so I had to look at some resources for better understanding.
 
 Resources that helped me:
 https://www.nltk.org/api/nltk.tokenize
+https://www.geeksforgeeks.org/python/generating-word-cloud-python/
