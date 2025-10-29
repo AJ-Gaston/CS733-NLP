@@ -17,6 +17,17 @@ def preprocessing(text):
     preprocess = []
     return preprocessed_text
 
+def accuracy():
+    accuracy = 0
+    return accuracy
+
+def precision():
+    precision = 0
+    return precision
+
+def f1_score():
+    model_f1_score = 0
+    return  model_f1_score
 def perplexity():
     """
     Calculate the perplexity of a language model
