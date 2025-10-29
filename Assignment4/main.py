@@ -14,7 +14,7 @@ def preprocessing(text):
     Returns:
         _type_: _description_
     """
-    preprocess
+    preprocess = []
     return preprocessed_text
 
 def perplexity():
@@ -28,7 +28,7 @@ def perplexity():
     return model_perplexity
 
 def main():
-    
+    return 0
 
 if __name__ == '__main__':
     main()
