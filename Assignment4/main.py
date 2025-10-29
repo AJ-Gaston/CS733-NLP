@@ -39,6 +39,11 @@ def perplexity():
     return model_perplexity
 
 def main():
+    #open the ham-spam file and read it as a csv file
+    with open('./training_data/ham-spam.csv', encoding='latin-1') as spamFile:
+        spam_csv = csv.reader(spamFile)
+        #ignore the first header bc it has the columns
+        next(spam_csv)
     return 0
 
 if __name__ == '__main__':

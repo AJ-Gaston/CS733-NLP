@@ -7,3 +7,5 @@ class feedforward_nn:
         self.epochs = epoch
         
         #Training variables
+        
+    def train()
