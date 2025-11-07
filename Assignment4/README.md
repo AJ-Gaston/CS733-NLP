@@ -18,7 +18,11 @@ Cell 8 is to check the pandas dataframe after preprocessing the text. Basically 
 
 Cell 9 is where I apply word2vec to the dataframe. I downloaded and imported the gensim library, which is where the word2vec is located.
 
-Cell 10 is 
+Cell 10 is the feedforward neural network for the word2vec embeddings. Since this is a neural network, I made it into a class that handles the training and calculating the model's accuracy, precision, recall, and f1-score. I made the accuracy, precision, recall, and f1-score into functions inside the class to make it easier. Especially since I'm measuring that neural network alone and not against the other neural network.
+
+Cell 11 is where I train the network based on the word2vec embeddings.
+
+Cell 12 - 15 are where I deal with the wiki-text dataset. In cells 12 and 13, I create a vocab based on the dataset and then I split the dataset into training and test sets in cell 13.
 
 
 
