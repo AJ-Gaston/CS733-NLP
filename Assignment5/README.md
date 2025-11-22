@@ -16,6 +16,18 @@ The fifth cell is where I create the hidden markov model and then train it with 
 
 The 6th cell is where I created a few test sentences to see if the viterbi algorithm works properly. I made a few short sentences and then two long ones to se if the Hidden Markov Model can accurately predict the tags for the words.
 
+The seventh cell
+
+The eight cell
 
 
 ### References
+#### For the Hidden Markov Model
+https://en.wikipedia.org/wiki/Viterbi_algorithm
+https://medium.com/data-science/hidden-markov-models-explained-with-a-real-life-example-and-python-code-2df2a7956d65
+https://goelarna.medium.com/part-of-speech-tagging-and-hidden-markov-models-5d1b548ece00
+https://www.youtube.com/watch?v=FqGzSM11iKY
+
+#### For the linear-chain Conditional random field
+https://www.youtube.com/watch?v=3w0EhxiebUA&t=408s
+https://www.geeksforgeeks.org/nlp/conditional-random-fields-crfs-for-pos-tagging-in-nlp/
