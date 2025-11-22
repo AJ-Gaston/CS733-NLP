@@ -17,4 +17,5 @@ The fifth cell is where I create the hidden markov model and then train it with 
 The 6th cell is where I created a few test sentences to see if the viterbi algorithm works properly. I made a few short sentences and then two long ones to se if the Hidden Markov Model can accurately predict the tags for the words.
 
 
+
 ### References
