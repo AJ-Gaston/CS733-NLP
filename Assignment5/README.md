@@ -31,3 +31,4 @@ https://www.youtube.com/watch?v=FqGzSM11iKY
 #### For the linear-chain Conditional random field
 https://www.youtube.com/watch?v=3w0EhxiebUA&t=408s
 https://www.geeksforgeeks.org/nlp/conditional-random-fields-crfs-for-pos-tagging-in-nlp/
+https://www.cs.mcgill.ca/~jcheung/teaching/fall-2017/comp550/lectures/lecture9.pdf
