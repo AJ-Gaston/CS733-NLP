@@ -45,8 +45,6 @@ The 19th cell is my modified CRF for NER.
 The 20th cell is where I run the model's training with my sentences and evaluate the model.
 
 
-
-
 ### References
 #### For the Hidden Markov Model
 https://en.wikipedia.org/wiki/Viterbi_algorithm
