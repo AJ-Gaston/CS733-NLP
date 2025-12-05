@@ -12,7 +12,7 @@ Cells 7-11 are where I create the Transformer Encoder, use PyTorch's dataloader 
 Cell 12 is where I plot the model and create the model's confusion matrix.
 
 ## Task 2: Setting up a transformer decoder
-
+For this part, I watched quite a few youtube videos to help me.
 ### References
 #### PyTorch library documentation
 [PyTorch Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
@@ -21,6 +21,7 @@ Cell 12 is where I plot the model and create the model's confusion matrix.
 [Pytorch Modules and when to use certain things](https://github.com/FrancescoSaverioZuppichini/Pytorch-how-and-when-to-use-Module-Sequential-ModuleList-and-ModuleDict)
 [PyTorch Adam](https://docs.pytorch.org/docs/stable/generated/torch.optim.Adam.html)
 
+https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
 https://stackoverflow.com/questions/50307707/how-do-i-convert-a-pandas-dataframe-to-a-pytorch-tensor
 https://www.geeksforgeeks.org/deep-learning/converting-a-pandas-dataframe-to-a-pytorch-tensor/
 https://www.youtube.com/watch?v=U0s0f995w14
