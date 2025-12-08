@@ -1,0 +1,576 @@
+[
+  {
+    "op": "core/row-removal",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "error",
+          "expression": "value",
+          "columnName": "error",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "no_reviews",
+                "l": "no_reviews"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "description": "Remove rows"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "address",
+      "isAdvertisement",
+      "city",
+      "language",
+      "name",
+      "originalLanguage",
+      "permanentlyClosed",
+      "placeId",
+      "postalCode",
+      "price",
+      "publishedAtDate",
+      "rating",
+      "reviewContext/Dietary restrictions",
+      "reviewContext/Group size",
+      "reviewContext/Kid-friendliness",
+      "reviewContext/Meal type",
+      "reviewContext/Noise level",
+      "reviewContext/Parking",
+      "reviewContext/Parking options",
+      "reviewContext/Parking space",
+      "reviewContext/Price per person",
+      "reviewContext/Recommendation for vegetarians",
+      "reviewContext/Recommended dishes",
+      "reviewContext/Reservation",
+      "reviewContext/Seating type",
+      "reviewContext/Service",
+      "reviewContext/Special events",
+      "reviewContext/Special offers",
+      "reviewContext/Vegetarian offerings",
+      "reviewContext/Vegetarian options",
+      "reviewContext/Wait time",
+      "reviewContext/Wheelchair accessibility",
+      "reviewDetailedRating/Atmosphere",
+      "reviewDetailedRating/Food",
+      "reviewDetailedRating/Service",
+      "reviewId",
+      "reviewImageUrls/0",
+      "reviewImageUrls/1",
+      "reviewImageUrls/2",
+      "reviewImageUrls/3",
+      "reviewImageUrls/4",
+      "reviewImageUrls/5",
+      "reviewImageUrls/6",
+      "reviewImageUrls/7",
+      "reviewImageUrls/8",
+      "reviewImageUrls/9",
+      "reviewImageUrls/10",
+      "reviewImageUrls/11",
+      "reviewImageUrls/12",
+      "reviewImageUrls/13",
+      "reviewImageUrls/14",
+      "reviewImageUrls/15",
+      "reviewImageUrls/16",
+      "reviewImageUrls/17",
+      "reviewImageUrls/18",
+      "reviewImageUrls/19",
+      "reviewImageUrls/20",
+      "reviewImageUrls/21",
+      "reviewImageUrls/22",
+      "reviewImageUrls/23",
+      "reviewImageUrls/24",
+      "reviewImageUrls/25",
+      "reviewImageUrls/26",
+      "reviewImageUrls/27",
+      "reviewImageUrls/28",
+      "reviewImageUrls/29",
+      "reviewImageUrls/30",
+      "reviewImageUrls/31",
+      "reviewImageUrls/32",
+      "reviewImageUrls/33",
+      "reviewImageUrls/34",
+      "reviewImageUrls/35",
+      "reviewImageUrls/36",
+      "reviewImageUrls/37",
+      "reviewImageUrls/38",
+      "reviewImageUrls/39",
+      "reviewImageUrls/40",
+      "reviewImageUrls/41",
+      "reviewImageUrls/42",
+      "reviewImageUrls/43",
+      "reviewImageUrls/44",
+      "reviewImageUrls/45",
+      "reviewImageUrls/46",
+      "reviewImageUrls/47",
+      "reviewImageUrls/48",
+      "reviewImageUrls/49",
+      "reviewOrigin",
+      "reviewUrl",
+      "reviewerId",
+      "reviewerNumberOfReviews",
+      "reviewerPhotoUrl",
+      "reviewerUrl",
+      "reviewsCount",
+      "scrapedAt",
+      "searchString",
+      "stars",
+      "state",
+      "street",
+      "temporarilyClosed",
+      "text",
+      "textTranslated",
+      "title",
+      "totalScore",
+      "translatedLanguage",
+      "url",
+      "visitedIn"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "title",
+      "address",
+      "city",
+      "totalScore",
+      "text",
+      "isAdvertisement",
+      "language",
+      "originalLanguage",
+      "permanentlyClosed",
+      "placeId",
+      "postalCode",
+      "price",
+      "publishedAtDate",
+      "rating",
+      "reviewOrigin",
+      "reviewUrl",
+      "reviewerId",
+      "stars",
+      "state",
+      "reviewerNumberOfReviews",
+      "street",
+      "temporarilyClosed",
+      "textTranslated",
+      "translatedLanguage",
+      "url",
+      "visitedIn"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "title",
+      "address",
+      "street",
+      "city",
+      "totalScore",
+      "text",
+      "isAdvertisement",
+      "language",
+      "originalLanguage",
+      "permanentlyClosed",
+      "placeId",
+      "postalCode",
+      "price",
+      "publishedAtDate",
+      "rating",
+      "reviewOrigin",
+      "reviewUrl",
+      "reviewerId",
+      "stars",
+      "state",
+      "reviewerNumberOfReviews",
+      "temporarilyClosed",
+      "textTranslated",
+      "translatedLanguage",
+      "url",
+      "visitedIn"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "title",
+          "expression": "value",
+          "columnName": "title",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "McDonald's",
+                "l": "McDonald's"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "address",
+          "expression": "value",
+          "columnName": "address",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "4696 Bonney Rd, Virginia Beach, VA 23462",
+                "l": "4696 Bonney Rd, Virginia Beach, VA 23462"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "title",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "McDonald's"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "McDonald's (Bonney Rd)"
+      }
+    ],
+    "description": "Mass edit cells in column title"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "title",
+          "expression": "value",
+          "columnName": "title",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "McDonald's",
+                "l": "McDonald's"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "address",
+          "expression": "value",
+          "columnName": "address",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "745 Newtown Rd, Norfolk, VA 23502",
+                "l": "745 Newtown Rd, Norfolk, VA 23502"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "title",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "McDonald's"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "McDonald's (Newtown Rd)"
+      }
+    ],
+    "description": "Mass edit cells in column title"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "title",
+      "address",
+      "city",
+      "stars",
+      "text",
+      "totalScore",
+      "isAdvertisement",
+      "language",
+      "originalLanguage",
+      "permanentlyClosed",
+      "placeId",
+      "postalCode",
+      "price",
+      "publishedAtDate",
+      "rating",
+      "reviewOrigin",
+      "reviewUrl",
+      "reviewerId",
+      "state",
+      "reviewerNumberOfReviews",
+      "temporarilyClosed",
+      "textTranslated",
+      "translatedLanguage",
+      "url",
+      "visitedIn"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "title",
+      "address",
+      "city",
+      "stars",
+      "text",
+      "totalScore",
+      "isAdvertisement",
+      "language",
+      "originalLanguage",
+      "permanentlyClosed",
+      "price",
+      "publishedAtDate",
+      "rating",
+      "reviewOrigin",
+      "reviewerNumberOfReviews",
+      "temporarilyClosed",
+      "textTranslated",
+      "translatedLanguage",
+      "url",
+      "visitedIn"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "title",
+      "address",
+      "city",
+      "stars",
+      "language",
+      "originalLanguage",
+      "text",
+      "textTranslated",
+      "translatedLanguage",
+      "totalScore",
+      "isAdvertisement",
+      "permanentlyClosed",
+      "price",
+      "publishedAtDate",
+      "reviewOrigin",
+      "reviewerNumberOfReviews",
+      "temporarilyClosed",
+      "url",
+      "visitedIn"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "title",
+      "address",
+      "city",
+      "stars",
+      "language",
+      "originalLanguage",
+      "text",
+      "textTranslated",
+      "translatedLanguage",
+      "totalScore",
+      "isAdvertisement",
+      "price",
+      "publishedAtDate",
+      "reviewOrigin",
+      "reviewerNumberOfReviews"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/text-transform",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"
+    },
+    "columnName": "publishedAtDate",
+    "expression": "value.toDate()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10,
+    "description": "Text transform on cells in column publishedAtDate using expression value.toDate()"
+  },
+  {
+    "op": "core/column-reorder",
+    "columnNames": [
+      "title",
+      "address",
+      "city",
+      "stars",
+      "text",
+      "language",
+      "originalLanguage",
+      "textTranslated",
+      "translatedLanguage",
+      "totalScore",
+      "publishedAtDate",
+      "reviewerNumberOfReviews"
+    ],
+    "description": "Reorder columns"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "title",
+          "expression": "value",
+          "columnName": "title",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "Burger King",
+                "l": "Burger King"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "address",
+          "expression": "value",
+          "columnName": "address",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "5572 Princess Anne Rd, Virginia Beach, VA 23462",
+                "l": "5572 Princess Anne Rd, Virginia Beach, VA 23462"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "title",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Burger King"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Burger King (Princess Anne Rd)"
+      }
+    ],
+    "description": "Mass edit cells in column title"
+  },
+  {
+    "op": "core/mass-edit",
+    "engineConfig": {
+      "facets": [
+        {
+          "type": "list",
+          "name": "title",
+          "expression": "value",
+          "columnName": "title",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "Burger King",
+                "l": "Burger King"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        },
+        {
+          "type": "list",
+          "name": "address",
+          "expression": "value",
+          "columnName": "address",
+          "invert": false,
+          "omitBlank": false,
+          "omitError": false,
+          "selection": [
+            {
+              "v": {
+                "v": "564 Newtown Rd, Virginia Beach, VA 23462",
+                "l": "564 Newtown Rd, Virginia Beach, VA 23462"
+              }
+            }
+          ],
+          "selectBlank": false,
+          "selectError": false
+        }
+      ],
+      "mode": "row-based"
+    },
+    "columnName": "title",
+    "expression": "value",
+    "edits": [
+      {
+        "from": [
+          "Burger King"
+        ],
+        "fromBlank": false,
+        "fromError": false,
+        "to": "Burger King (Newtown Rd)"
+      }
+    ],
+    "description": "Mass edit cells in column title"
+  }
+]
