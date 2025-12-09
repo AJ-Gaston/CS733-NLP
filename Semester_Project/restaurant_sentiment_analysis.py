@@ -44,6 +44,14 @@ class RestaurantSentimentAnalysisModel:
         # Emotional intensity indicators (Exclamation point and quesiton marks are a good indicator)
         has_exclamation = combined_text.str.contains('!').astype(int).values.reshape(-1, 1)
         has_question = combined_text.str.contains(r'\?').astype(int).values.reshape(-1, 1)
+       
+        #Numerical Features (specifically RATINGS)
+        # Core ratings (normalized)
+        star_norm = (df['stars'] / 5.0).values.reshape(-1, 1)
+        total_score_norm = (df['totalScore'] / 5.0).values.reshape(-1, 1)
+        
+        # MOST IMPORTANT: Rating discrepancy (the actual review - the customer's review)
+        discrepancy = ((df['totalScore'] - df['stars']) / 5.0).values.reshape(-1, 1)
         
         #Time features
         df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate']) #Convert to datetime if it's not already converted
@@ -51,9 +59,57 @@ class RestaurantSentimentAnalysisModel:
         year_norm = (df['publishedAtDate'].dt.year / 2024.0).values.reshape(-1, 1) #Get year
         month_norm = (df['publishedAtDate'].dt.month / 12.0).values.reshape(-1, 1)
         day_of_week = (df['publishedAtDate'].dt.dayofweek / 6.0).values.reshape(-1, 1)
+        is_weekend = df['publishedAtDate'].dt.dayofweek.isin([5, 6]).astype(int).values.reshape(-1, 1) #check to see if it was a weekend
+       
+        #Language features
+        df['language'] = df['language'].fillna('unknown')
+        language_major = df['language'].isin(['en', 'es', 'fr', 'de', 'zh', 'kr', 'it']).astype(int).values.reshape(-1, 1)
+        is_english = (df['language'] == 'en').astype(int).values.reshape(-1, 1)
         
+        #Make a numerical feature matrix  using np.column_stack
+        numerical_features = np.column_stack([
+        star_norm,           # Individual rating
+        total_score_norm,    # Restaurant average
+        discrepancy,         # Difference (GOLDEN feature)
+        year_norm,           # Year
+        month_norm,          # Month
+        day_of_week,         # Day of week
+        is_weekend,          # Weekend flag
+        language_major,      # Common language
+        is_english           # English flag
+        ])
         
-        return features
+        # Combine ALL features using np.hstack()
+        all_features = np.hstack([
+            original_embeddings,     # 768 dim: Original text semantics
+            translated_embeddings,   # 768 dim: Translated text semantics
+            has_original_text,           # 1 dim: Has original text
+            has_translated_text,         # 1 dim: Has translation
+            text_length,            # 1 dim: Character count
+            word_count,             # 1 dim: Word count
+            has_exclamation,        # 1 dim: Emotional intensity
+            has_question,           # 1 dim: Question indicator
+            numerical_features      # 9 dim: All numerical features
+        ])
+        
+        #Create feature names just for checking
+        self.feature_names = (
+        [f'orig_emb_{i}' for i in range(768)] +
+        [f'trans_emb_{i}' for i in range(768)] +
+        ['has_original', 'has_translated', 'text_length', 'word_count', 
+         'has_exclamation', 'has_question'] +
+        ['star_norm', 'total_score_norm', 'rating_discrepancy', 'year_norm',
+         'month_norm', 'day_of_week', 'is_weekend', 'language_major', 'is_english']
+        )
+       
+        #This is used to see if everything works(will comment out later)
+        print(f"Feature dimensions:")
+        print(f"  Original embeddings: {original_embeddings.shape[1]}")
+        print(f"  Translated embeddings: {translated_embeddings.shape[1]}")
+        print(f"  Text quality: 6 features")
+        print(f"  Numerical: {numerical_features.shape[1]} features")
+        print(f"  TOTAL: {all_features.shape[1]} features")
+        return all_features
     def _get_text_embeddings(self, texts, batch_size=32):
         """Get CLS token embeddings from DistilBERT"""
         embeddings = []
