@@ -110,18 +110,34 @@ class RestaurantSentimentAnalysisModel:
         print(f"  Numerical: {numerical_features.shape[1]} features")
         print(f"  TOTAL: {all_features.shape[1]} features")
         return all_features
+    
     def _get_text_embeddings(self, texts, batch_size=32):
         """Get CLS token embeddings from DistilBERT"""
         embeddings = []
-        return embeddings 
-    def forward():
-        """
-        Forward pass of the model
-
-        Returns:
-            _type_: _description_
-        """
-        return output
+        
+        #Process the text embedding in batches
+        for i in range(0, len(texts), batch_size):
+            batch_texts = texts[i:i+batch_size]
+            
+            #Tokenize the batch using DistilBERT tokenizer
+            inputs = self.tokenizer(
+            batch_texts,
+            padding=True,      # Pad short texts
+            truncation=True,   # Truncate long texts  
+            max_length=128,    # To 128 tokens max
+            return_tensors='pt'
+            )
+            
+            # Get DistilBERT embeddings
+            with torch.no_grad():  # No gradient needed (inference only)
+                outputs = self.text_encoder(**inputs)
+                # Extract [CLS] token (first token, represents whole sentence)
+                batch_embeddings = outputs.last_hidden_state[:, 0, :].numpy()
+                embeddings.append(batch_embeddings)
+        
+        # Combine all batches using numpy's vstack()
+        return np.vstack(embeddings)  # Returns shape: [num_samples, 768]
+    
     def train_model(model, trainloader):
         """
         Train the model based on the review
@@ -129,9 +145,5 @@ class RestaurantSentimentAnalysisModel:
         and star associated with review
         """
         return
-    def evaluate_model(y_true,y_pred):
-        """
-        This evaluates the model's accuracy, precision, recall, and f1-score
-        Also used to compare the top 10 reviews to the restaurant's overall score
-        """
-        return
+    def predict():
+        return 
