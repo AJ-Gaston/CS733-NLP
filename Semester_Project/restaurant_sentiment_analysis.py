@@ -20,6 +20,7 @@ class RestaurantSentimentAnalysisModel:
                  use_caching=False,
                  cache_size=1000):
         
+        #Text Encoding Components
         self.text_encoder = DistilBertModel.from_pretrained(text_model_name)
         self.tokenizer = DistilBertTokenizer.from_pretrained(text_model_name)
         
@@ -85,8 +86,9 @@ class RestaurantSentimentAnalysisModel:
         current_year = datetime.now().year #Get the current year (2025)
         year_norm = (df['publishedAtDate'].dt.year / current_year).fillna(0.5).values
         
-        #Month -cyclic encoding
+        #Month -cyclic encoding (use 2*pi)
         month_rad = 2 * np.pi * df['publishedAtDate'].dt.month.fillna(6) / 12
+        #Get the sin and cosine for cyclical distance
         month_sin = np.sin(month_rad).values
         month_cos = np.cos(month_rad).values
         
@@ -303,7 +305,7 @@ class RestaurantSentimentAnalysisModel:
         """
         Predicts the sentiment of new reviews
         Args:
-            df (): 
+            df (pd Dataframe): 
             return_prob (bool, optional): indicates whether or not to return the probabilities. Defaults to False.
         """
         #Check to see if the model was trained
