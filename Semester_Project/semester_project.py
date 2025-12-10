@@ -196,6 +196,8 @@ def main():
     individual_model = RestaurantSentimentAnalysisModel(use_restaurant_features=True)
     individual_model.train_model(df)
     
+    eval_results = individual_model.evaluate_model(df, test_size=0.2)
+    
     # Show feature importance
     print("\nTop 10 most important features:")
     for feature, importance in individual_model.get_feature_importance(top_n=10):

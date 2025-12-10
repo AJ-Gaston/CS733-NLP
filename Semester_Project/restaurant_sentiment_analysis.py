@@ -6,6 +6,7 @@ import transformers
 from transformers import DistilBertModel, DistilBertTokenizer
 import lightgbm as lgb
 import sklearn
+from sklearn.metrics import accuracy_score,classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from datetime import datetime
 import warnings
@@ -334,7 +335,60 @@ class RestaurantSentimentAnalysisModel:
                 self.cache.pop(next(iter(self.cache)))
         
         return predictions
-
+    
+    def evaluate_model(model, df, test_size=0.2):
+        """
+        Evaluation model (I forgot to add this initially)
+        """
+        if model.lgb_model is None:
+            print("Training model...")
+            model.train(df_train)
+        df_train, df_test = train_test_split(df, test_size=test_size, stratify=df['sentiment'])
+        
+        y_test = df_test['sentiment'].values
+        try:
+            y_pred = model.predict(df_test)  # Class predictions (0, 1, 2)
+            y_pred_prob = model.predict(df_test, return_prob=True)  # Probabilities
+        except AttributeError:
+            # Fallback if return_prob doesn't exist
+            y_pred = model.predict(df_test)
+            y_pred_prob = None
+            
+        print("Classification Report:")
+        print(classification_report(y_test, y_pred, 
+                                target_names=['Negative', 'Neutral', 'Positive']))
+        
+        # Confusion matrix using sklearn
+        cm = confusion_matrix(y_test, y_pred)
+        print("\nConfusion Matrix:")
+        print("Rows = True, Columns = Predicted")
+        
+        # Pretty print confusion matrix
+        print("      Neg   Neu   Pos")
+        print("     -----------------")
+        for i, row in enumerate(cm):
+            label = ['Neg', 'Neu', 'Pos'][i]
+            print(f"{label} | {row[0]:4d}  {row[1]:4d}  {row[2]:4d}")
+        # Per-class accuracy
+        class_acc = {}
+        for i in range(3):
+            mask = y_test == i
+            if mask.sum() > 0:
+                class_acc[i] = accuracy_score(y_test[mask], y_pred[mask])
+        
+        accuracy = accuracy_score(y_test, y_pred)
+    
+        print(f"\nOverall Accuracy: {accuracy:.4f}")
+        print("\nPer-Class Accuracy:")
+        for cls, acc in class_acc.items():
+            cls_name = ['Negative', 'Neutral', 'Positive'][cls]
+            print(f"  {cls_name}: {acc:.4f}")
+        
+        return {
+        'accuracy': accuracy,
+        'class_accuracy': class_acc,
+        'confusion_matrix': cm
+        }
     def _create_cache_key(self, df):
         """Create cache key from dataframe content"""
         # Use hash of concatenated text and ratings
