@@ -57,6 +57,8 @@ def analyze_restaurant_multiple_windows(model, restaurant_df, review_windows= [1
     
     results = []
     restaurant_total_score = restaurant_df['totalScore'].iloc[0] / 5.0
+    #Fix the scaling problem (originally it was 0-1 but then sentiment score was -1:1)
+    restaurant_total_score_scaled = (restaurant_total_score / 2.5) - 1  # 0-5 → -1:1
     
     for window_size in review_windows:
         # Skip if not enough reviews for this window
