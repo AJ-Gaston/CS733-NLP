@@ -33,11 +33,34 @@ class RestaurantSentimentGUI:
         """
         Configure the colors and fonts for the GUI
         """
-    
+        self.colors = {
+            'positive': '#4CAF50',
+            'negative': '#F44336',
+            'neutral': '#2196F3',
+            'background': '#f0f0f0',
+            'card': '#ffffff',
+            'text': '#333333'
+        }
+        
+        self.fonts = {
+            'title': ('Arial', 16, 'bold'),
+            'heading': ('Arial', 12, 'bold'),
+            'normal': ('Arial', 10),
+            'metric': ('Arial', 14, 'bold')
+        }
+        
     def setup_gui(self):
         """
         Build the GUI interface
         """
+        # Main container with padding
+        main_frame = Frame(self.root, bg=self.colors['background'], padx=20, pady=20)
+        main_frame.pack(fill=BOTH, expand=True)
+        
+        # Title of the GUI
+        title_label = Label(main_frame, text="Restaurant Sentiment Analyzer", 
+                          font=self.fonts['title'], bg=self.colors['background'])
+        title_label.pack(pady=(0, 20))
         
     def load_data(self):
         """
