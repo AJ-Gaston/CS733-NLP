@@ -24,8 +24,11 @@ def prepare_dataset(df):
         
     df['sentiment'] = df['stars'].apply(star_to_sentiment)
 
-    df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], format='ISO8601')
-    df['publishedAtDate'] = df['publishedAtDate'].dt.tz_localize(None)  # Remove timezone   
+    #Fixed this line because of setting warnings
+    df['publishedAtDate'] = pd.to_datetime(
+        df['publishedAtDate'], 
+        format='ISO8601'
+    ).dt.tz_localize(None)
     
     df['text'] = df['text'].fillna('[NO_TEXT]')
     df['textTranslated'] = df['textTranslated'].fillna('[NO_TEXT]')

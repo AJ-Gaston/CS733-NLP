@@ -80,8 +80,7 @@ class RestaurantSentimentAnalysisModel:
         Returns:
             dictionary: contians all the features of a restaurant's dataframe
         """
-        #Ensure that the publishedAtDate is datetime format
-        df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], errors='coerce')
+  
         #Look at the year, month, and day, normalize them to between 0-1 and reshape them to a column vector
         current_year = datetime.now().year #Get the current year (2025)
         year_norm = (df['publishedAtDate'].dt.year / current_year).fillna(0.5).values
@@ -189,7 +188,6 @@ class RestaurantSentimentAnalysisModel:
         if self.use_restaurant_features:
             # Review recency (inverse of days ago)
             if 'publishedAtDate' in df.columns:
-                df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], errors='coerce')
                 days_ago = (pd.Timestamp.now() - df['publishedAtDate']).dt.days.fillna(365)
                 recency = 1 / (1 + days_ago / 30)  # Decay over months
                 recency = recency.values.reshape(-1, 1)
