@@ -88,6 +88,16 @@ class RestaurantSentimentGUI:
                                             width=15, state="readonly")
         self.window_dropdown.grid(row=0, column=3, padx=10, pady=10)
         self.window_dropdown.bind('<<ComboboxSelected>>', self.on_window_selected)
+
+        #Analyze button (use with Button())
+        self.analyze_btn = Button(control_frame, text="Analyze", command=self.analyze_restaurant,
+                                 font=self.fonts['heading'], bg=self.colors['neutral'], 
+                                 fg='white', state=DISABLED)
+        self.analyze_btn.grid(row=0, column=4, padx=10, pady=10)
+        
+        # Display Results Area (using anothe frame)
+        results_frame = Frame(main_frame, bg=self.colors['background'])
+        results_frame.pack(fill=BOTH, expand=True)
         
     def load_data(self):
         """
