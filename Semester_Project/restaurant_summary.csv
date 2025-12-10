@@ -1,0 +1,64 @@
+restaurant,city,totalScore,total_reviews,largest_window,sentiment_gap,direction,significant
+7-Eleven,Virginia Beach,2.6,25,10,-0.31996746479297355,declining,True
+Ashley's On Greenwich,Virginia Beach,3.3,91,10,-0.7599314908891689,declining,True
+Big Apple Pizzeria,Virginia Beach,4.0,150,10,0.09996668215677584,stable,False
+Biryani Hub,Norfolk,4.7,150,10,0.05992951120872547,stable,False
+Bodacious Pizza & Grill,Virginia Beach,4.6,150,10,-0.32000850500264677,declining,True
+Boil Bay Seafood City,Norfolk,4.2,150,10,-0.04002721991967029,stable,False
+Boss Queens Soul Cafe,Norfolk,4.1,150,10,-0.22000589393238745,declining,True
+Boulevard Stop Mart - Krispy Krunchy Chicken,Virginia Beach,4.3,116,10,-0.4599917325931051,declining,True
+Boyd Dining Centre,Virginia Beach,3.0,8,7,-0.59994387950949,declining,True
+Burger King (Newtown Rd),Virginia Beach,3.2,150,10,-0.13998941222643035,declining,False
+Burger King (Princess Anne Rd),Virginia Beach,3.5,150,10,-0.39997014306404316,declining,True
+California Pizza Kitchen,Virginia Beach,4.2,150,10,-0.14001810509739043,declining,False
+Captain D's,Norfolk,3.6,150,10,0.07997376923855992,stable,False
+Charleys Cheesesteaks and Wings,Virginia Beach,3.5,40,10,-0.6999462305486197,declining,True
+Chick-fil-A,Virginia Beach,4.4,150,10,-0.08002350620454524,stable,False
+Chinatown restaurant,Virginia Beach,4.2,121,10,-0.4399911193326834,declining,True
+Costa Del Mar 2,Virginia Beach,4.0,107,10,-0.7999547336144779,declining,True
+Cypress Point Country Club,Virginia Beach,4.3,150,10,-0.2600072461791224,declining,True
+Denny's,Norfolk,3.4,150,10,-0.7799395558420177,declining,True
+Domino's Pizza,Virginia Beach,3.0,150,10,-1.2998869277327207,declining,True
+El Rodeo Mexican Restaurant,Norfolk,4.5,150,10,-0.10002925097324256,declining,False
+Fu Hing Restaurant,Virginia Beach,4.0,150,10,-0.20000740468231737,declining,True
+Fujian,Norfolk,3.6,150,10,-0.3199884395672724,declining,True
+Golden City,Virginia Beach,3.8,150,10,-0.16000691865305317,declining,True
+Hong Kong House,Virginia Beach,4.2,66,10,-0.24000614736256187,declining,True
+Ibis Cuisine Restaurant,Virginia Beach,4.3,4,3,0.1399585971991022,improving,False
+Interlude At Westin Downtown Restaurant,Virginia Beach,4.1,50,10,-0.22000643613956627,declining,True
+Jade Villa Chinese Restaurant,Virginia Beach,4.3,150,10,-0.06003006162976143,stable,False
+Lumpia Lane Food Truck,Virginia Beach,5.0,4,3,-4.448342912155567e-05,stable,False
+MP Island Café,Norfolk,4.1,150,10,-0.41998957412888266,declining,True
+Marco's Pizza,Virginia Beach,4.0,150,10,-0.2999996729906993,declining,True
+Mazari Kebab & More,Virginia Beach,4.5,150,10,0.09995539518008145,stable,False
+McDonald's (Bonney Rd),Virginia Beach,3.4,150,10,-0.8799272398152759,declining,True
+McDonald's (Newtown Rd),Norfolk,3.4,150,10,-0.7799396436660997,declining,True
+No.1 Yummy,Virginia Beach,4.3,150,10,-0.36000269349657926,declining,True
+OMEGA BAR,Virginia Beach,4.3,150,10,-0.3599992559348283,declining,True
+Pho 79,Virginia Beach,3.8,131,10,0.03997604101656982,stable,False
+Pho VA (Formerly Phuong Lien Bakery),Virginia Beach,4.1,41,10,-0.6199715814516548,declining,True
+Phoenix Restaurant and Lounge,Virginia Beach,4.2,120,10,0.05996327533475121,stable,False
+Pizza Hut,Virginia Beach,3.6,150,10,-0.3199912419149516,declining,True
+Q-Master Billiards,Virginia Beach,4.5,150,10,-0.3000061746303191,declining,True
+Sakura Japanese Restaurant,Virginia Beach,4.3,150,10,-0.759964512845778,declining,True
+Sal’s NY Slice Pizzeria,Virginia Beach,4.4,144,10,0.1199554637131569,improving,False
+Shake Shack Virginia Beach,Virginia Beach,4.1,150,10,-0.020023702349855954,stable,False
+Sonic Drive-In,Virginia Beach,3.5,150,10,-0.7999425841525409,declining,True
+Subway,Virginia Beach,4.0,150,10,-2.341003145978071e-05,stable,False
+Sunrise Pizza Restaurant,Virginia Beach,4.1,150,10,-0.02002409782656034,stable,False
+Suphan Thai Cuisine,Virginia Beach,4.6,150,10,-0.12002352503262581,declining,False
+Taco Bell,Norfolk,3.7,150,10,-0.7399537858982647,declining,True
+The Bistro - Eat. Drink. Connect.®,Virginia Beach,3.7,21,10,-0.7399539171315112,declining,True
+The Burger Den,Norfolk,3.2,10,10,-0.5399520691575768,declining,True
+The Frog Sports Bar & Grill,Virginia Beach,4.2,100,10,-0.14002008377006803,declining,False
+Thee Soulfood Kitchen,Norfolk,3.9,150,10,-0.37998952835442457,declining,True
+This Old House Japanese Restaurant,Virginia Beach,4.7,100,10,-0.14003805195443553,declining,False
+Topgolf Virginia Beach,Virginia Beach,4.5,150,10,-0.10002687976558977,declining,False
+Touch of Da South,Virginia Beach,3.2,5,5,-0.4399763716465003,declining,True
+Town Center Cold Pressed - Virginia Beach Town Center,Virginia Beach,4.5,150,10,-0.10003521323986231,declining,False
+Tribal Axe,Virginia Beach,4.8,60,10,0.039945108831682896,stable,False
+"Volcano Sushi, Grill, Bar& karaoke (Town Center)",Virginia Beach,4.0,150,10,-0.4999821632480884,declining,True
+Waffle House,Virginia Beach,4.1,150,10,-0.41999110532060996,declining,True
+Wawa,Norfolk,3.0,150,10,-0.19999573984036245,declining,True
+Wendy's,Norfolk,3.2,150,10,-0.7399363972681862,declining,True
+Wingstop,Virginia Beach,3.4,150,10,-0.4799725169024102,declining,True

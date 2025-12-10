@@ -34,9 +34,10 @@ def prepare_dataset(df):
     
     return df
 
-def analyze_restaurant_trends(model, restaurant_df, review_windows= [1,3,5,7,10]):
-    """_summary_
-
+def analyze_restaurant_multiple_windows(model, restaurant_df, review_windows= [1,3,5,7,10]):
+    """
+    Analyze restaurant sentiment across multiple review windows
+    Returns analysis for each window that has enough data
     Args:
         model (RestaurantSentimentModel): an instance of the sentiment analaysis model
         restaurant_df (pd Dataframe): dataframe of a sepcific restaurant
@@ -110,7 +111,7 @@ def analyze_restaurant_trends(model, restaurant_df, review_windows= [1,3,5,7,10]
     
     #Otherise return the restaurant with review(s) sentiment analysis
     return {
-        'restaurant': restaurant_df['restaurant'].iloc[0],
+        'restaurant': restaurant_df['title'].iloc[0],
         'address': restaurant_df['address'].iloc[0] if 'address' in restaurant_df.columns else '',
         'city': restaurant_df['city'].iloc[0] if 'city' in restaurant_df.columns else '',
         'totalScore': restaurant_df['totalScore'].iloc[0],
@@ -120,6 +121,58 @@ def analyze_restaurant_trends(model, restaurant_df, review_windows= [1,3,5,7,10]
         'first_review_date': restaurant_df['publishedAtDate'].min(),
         'latest_review_date': restaurant_df['publishedAtDate'].max()
     }
+    
+def save_detailed_results(all_results):
+    """Save multi-window analysis to CSV for further exploration"""
+    rows = []
+    
+    for result in all_results:
+        restaurant_info = {
+            'restaurant': result['restaurant'],
+            'city': result['city'],
+            'totalScore': result['totalScore'],
+            'total_reviews': result['total_reviews'],
+            'historical_stars_avg': result['historical_stars_avg']
+        }
+        
+        for window in result['windows_analyzed']:
+            row = restaurant_info.copy()
+            row.update({
+                'window_size': window['window_size'],
+                'recent_sentiment': window['recent_sentiment_mean'],
+                'sentiment_gap': window['sentiment_gap'],
+                'significant': window['significant_discrepancy'],
+                'direction': window['direction'],
+                'positive_ratio': window['positive_ratio'],
+                'negative_ratio': window['negative_ratio'],
+                'recent_stars_avg': window['recent_stars_avg']
+            })
+            rows.append(row)
+    
+    results_df = pd.DataFrame(rows)
+    results_df.to_csv('multi_window_analysis.csv', index=False)
+    print(f"Saved {len(results_df)} rows to 'multi_window_analysis.csv'")
+    
+    # Also create summary by restaurant
+    summary_rows = []
+    for result in all_results:
+        if result['windows_analyzed']:
+            # Use the largest available window for summary
+            largest_window = result['windows_analyzed'][-1]
+            summary_rows.append({
+                'restaurant': result['restaurant'],
+                'city': result['city'],
+                'totalScore': result['totalScore'],
+                'total_reviews': result['total_reviews'],
+                'largest_window': largest_window['window_size'],
+                'sentiment_gap': largest_window['sentiment_gap'],
+                'direction': largest_window['direction'],
+                'significant': largest_window['significant_discrepancy']
+            })
+    
+    summary_df = pd.DataFrame(summary_rows)
+    summary_df.to_csv('restaurant_summary.csv', index=False)
+    print(f"Saved {len(summary_df)} rows to 'restaurant_summary.csv'")
 
 def main():
     reviews = pd.read_csv('./Dataset/Filtered_GoogleMaps_reviews.csv') #read in dataset with pandas
@@ -145,67 +198,96 @@ def main():
     for feature, importance in individual_model.get_feature_importance(top_n=10):
         print(f"  {feature}: {importance:.4f}")
     
-    results = []
-    restaurant_count = 0
+    # Analyze each restaurant with multiple windows
+    print("\nAnalyzing restaurants with multiple review windows...")
+    all_results = []
+    windows = [1, 3, 5, 7, 10]
+    
     for restaurant_name, restaurant_df in df.groupby('title'):
-        restaurant_count += 1
-        print(f"Processed {restaurant_count} restaurants...")
-    
-    if len(restaurant_df) >= 10:  # Need enough reviews
-            analysis = analyze_restaurant_trends(individual_model, restaurant_df, top_n=10)
-            if analysis:
-                results.append(analysis)
-                
-    print(f" Analyzed {len(results)} restaurants (with over 10 reviews)")
-    
-    # Find restaurants with significant discrepancies
-    alerts = [r for r in results if r['significant_discrepancy']]
-    improving = [r for r in alerts if r['direction'] == 'improving']
-    declining = [r for r in alerts if r['direction'] == 'declining']
-    
-    print(f" Found {len(alerts)} restaurants with significant changes:")
-    print(f" {len(improving)} improving (recent reviews better than average)")
-    print(f" {len(declining)} declining (recent reviews worse than average)")
-    
-    #Look at the positive changes (sort them)
-    positive_changes = sorted([r for r in results if r['sentiment_gap'] > 0], 
-                            key=lambda x: x['sentiment_gap'], reverse=True)[:5]
-    
-    for i, r in enumerate(positive_changes, 1):
-        print(f"\n{i}. {r['restaurant']}")
-        print(f"   Location: {r['city']}")
-        print(f"   Total Score: {r['totalScore']:.1f}/5")
-        print(f"   Recent Sentiment: {r['recent_sentiment_mean']:.2f}")
-        print(f"   Gap: +{r['sentiment_gap']:.3f} (↑ {r['direction']})")
-        print(f"   Recent Stars Avg: {r['recent_stars_avg']:.1f}/5")
-        print(f"   Historical Stars Avg: {r['historical_stars_avg']:.1f}/5")
-    
-    #Look at the negative changes (sort them)
-    negative_changes = sorted([r for r in results if r['sentiment_gap'] < 0], 
-                            key=lambda x: x['sentiment_gap'])[:5]
-    
-    for i, r in enumerate(negative_changes, 1):
-        print(f"\n{i}. {r['restaurant']}")
-        print(f"   Location: {r['city']}")
-        print(f"   Total Score: {r['totalScore']:.1f}/5")
-        print(f"   Recent Sentiment: {r['recent_sentiment_mean']:.2f}")
-        print(f"   Gap: {r['sentiment_gap']:.3f} (↓ {r['direction']})")
-        print(f"   Recent Stars Avg: {r['recent_stars_avg']:.1f}/5")
-        print(f"   Historical Stars Avg: {r['historical_stars_avg']:.1f}/5")
-    
-    # Save results to CSV for further analysis
-    results_df = pd.DataFrame(results)
-    if len(results_df) > 0:
-        # Save with useful columns
-        output_cols = ['restaurant', 'city', 'totalScore', 'recent_sentiment_mean', 
-                      'sentiment_gap', 'significant_discrepancy', 'direction',
-                      'recent_review_count', 'positive_ratio', 'negative_ratio',
-                      'recent_stars_avg', 'historical_stars_avg']
+        analysis = analyze_restaurant_multiple_windows(
+            individual_model, 
+            restaurant_df, 
+            review_windows=windows
+        )
         
-        results_df[output_cols].to_csv('restaurant_sentiment_analysis.csv', index=False)
-        print(f"Results saved to 'restaurant_sentiment_analysis.csv'")
+        if analysis:
+            all_results.append(analysis)
     
-    return results
+    # Generate comprehensive insights
+    print(f" Analyzed {len(all_results)} restaurants")
+    
+    # Count restaurants by number of windows they could support
+    window_counts = {}
+    for result in all_results:
+        windows_available = len(result['windows_analyzed'])
+        window_counts[windows_available] = window_counts.get(windows_available, 0) + 1
+    
+    print("\nRestaurants by available review windows:")
+    for windows_count, restaurant_count in sorted(window_counts.items()):
+        window_list = windows[:windows_count]
+        print(f"  {windows_count} windows ({window_list}): {restaurant_count} restaurants")
+    
+    # Analyze trends across window sizes
+    for window_size in windows:
+        # Get results for this window size (where available)
+        window_results = []
+        for result in all_results:
+            for window in result['windows_analyzed']:
+                if window['window_size'] == window_size:
+                    window_results.append({
+                        'restaurant': result['restaurant'],
+                        'gap': window['sentiment_gap'],
+                        'significant': window['significant_discrepancy'],
+                        'direction': window['direction']
+                    })
+        #Should print out results if the window results was created
+        if window_results:
+            # Sentiment gap
+            gaps = [r['gap'] for r in window_results]
+            # Look at the significant discrepancies in the reviews and totalScore
+            significant_count = sum(r['significant'] for r in window_results)
+            # Look at where the restaurant is improving/declining
+            improving_count = sum(1 for r in window_results if r['direction'] == 'improving')
+            declining_count = sum(1 for r in window_results if r['direction'] == 'declining')
+            
+            print(f"\nWindow Size: {window_size} reviews")
+            print(f"  Restaurants analyzed: {len(window_results)}")
+            print(f"  Average gap: {np.mean(gaps):.3f}")
+            print(f"  Significant discrepancies: {significant_count} ({significant_count/len(window_results):.1%})")
+            print(f"  Improving: {improving_count}, Declining: {declining_count}, Stable: {len(window_results)-improving_count-declining_count}")
+            
+    consistent_improving = []
+    consistent_declining = []
 
+    for result in all_results:
+        if len(result['windows_analyzed']) >= 3:  # At least 3 windows analyzed
+            directions = [w['direction'] for w in result['windows_analyzed']]
+            gaps = [w['sentiment_gap'] for w in result['windows_analyzed']]
+        
+            # Check if all windows show same trend
+            if all(d == 'improving' for d in directions) and all(g > 0 for g in gaps):
+                consistent_improving.append(result)
+            elif all(d == 'declining' for d in directions) and all(g < 0 for g in gaps):
+                consistent_declining.append(result)
+    
+    # Display the consistently improving and declining resaturants
+    print(f"\nConsistently Improving: {len(consistent_improving)} restaurants")
+    print(f"Consistently Declining: {len(consistent_declining)} restaurants")
+    
+    #Print out the top 5 consistently improving
+    if consistent_improving:
+        print("\nTop 5 Most Consistently Improving Restaurants:")
+        for i, result in enumerate(sorted(consistent_improving, 
+                                        key=lambda x: np.mean([w['sentiment_gap'] for w in x['windows_analyzed']]), 
+                                        reverse=True)[:5], 1):
+            avg_gap = np.mean([w['sentiment_gap'] for w in result['windows_analyzed']])
+            print(f"{i}. {result['restaurant']} - Avg Gap: +{avg_gap:.3f}")
+            for window in result['windows_analyzed']:
+                print(f"   Window {window['window_size']}: {window['sentiment_gap']:+.3f} ({window['direction']})")
+                
+    print("\n Saving detailed analysis...")
+    save_detailed_results(all_results)       
+    return all_results
+       
 if __name__ == '__main__':
     main()

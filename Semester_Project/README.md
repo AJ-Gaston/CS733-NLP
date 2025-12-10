@@ -1,7 +1,10 @@
 # CS 733 Semester Project
+
 ## Author: Alejxi Gaston
-GITHUB LINK:
+
 ## Project
+GITHUB LINK FOR PROJECT REPOSITORY:
+
 ### 1. Web-scraping
 For this portion I used Apify's Google Maps Review Scraper and created a csv file instead of json due to the way that Apify's Scraper works. 
 I cleaned the csv file using OpenRefine, a software previously used in CS 625 to clean datasets of information such as unneeded columns, re-ordering columns to format I like, or filling in null/nan data.
