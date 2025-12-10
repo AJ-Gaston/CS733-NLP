@@ -6,7 +6,8 @@
 GITHUB LINK FOR PROJECT REPOSITORY:
 
 ### 1. Web-scraping
-For this portion I used Apify's Google Maps Review Scraper and created a csv file instead of json due to the way that Apify's Scraper works. 
+For this portion I used Apify's Google Maps Review Scraper and created a csv file instead of json due to the way that Apify's Scraper works. Apify allows exporting these reviews as a .json file or a .csv file. I chose a .csv file or easier manipulation.
+ 
 I cleaned the csv file using OpenRefine, a software previously used in CS 625 to clean datasets of information such as unneeded columns, re-ordering columns to format I like, or filling in null/nan data.
 
 ### 2. Model Implementation
@@ -50,6 +51,24 @@ The model uses DistilBert and LightGBM for a few reasons:
 
 DistilBert can capture deep semantic representation of the reviews, detect sarcasm/negation, and it can embed the reviews which is then sent to the LightGBM model.
 LightGBM is needed because while it can't understand different languages, it can handle reviews with missing data such as text and dates. For the text, it can look at the review's star rating and the restaurant's total score. For the date, it can simply use other features. Another strength of LightGBM is that it can train fast.
+
+After the sentiment analysis training is complete, it's sent back to the semester_project.py main function and the top 10 most important features printed onto the terminal/screen for analysis.
+
+Then, each restaurant is analyzed. A review window is create with number, indicating the number of reviews to look at. The the trained model, dataframe focused on a single restaurant, and the review windo are sent to the analyze_restaurant_multiple_reviews function.
+
+Analyze_restaurant_multiple_reviews creates a list that holds all the analysis results. It captures the restaurant's total score and goes through each number in the reviews_window. It skips if the restaurant doesn't have enough reviews. If it does have enough reviews, then the top reviews are looked at by publishedDate. The model predicts the review and returns the probabilities. Sentiment score is calculated by subtracting the negative score from the positive score, and the mean of the sentiment score is calculated with numpy's mean. The sentiment gap is calculated by subtracting restaurant's total score from the mean sentiment score.
+Dynamic significant threshold is applied because with such a small sample size, random variation is much larger. This means that there needs to be more evidence for "significant change" to be applied. So if the significant threshold is above a certain floating point, that means there was a large enough gap to claim a significant change. The threhsold decreases by 0.05 as each review window increases. Significant change is calculated checking if the absolute value of the sentiment gap is larger than the threshold.
+Then trends are calculated. If the sentiment gap is greater than 0.1, it means there was improvement for the restaurant's reviews. But if the sentimen gap is less than -0.1, it meant that there was a decline in the restaurant's reviews.
+The result fo the review window is saved in a dictionary that contains all of these trends, which is then appened to the results list created at the beginning of the function.
+If the results has review window analysis, then it returns a dictionary with the restaurant's title, address, total score, total reviews, window analysis, and other features. If there was no window analysis, then it returns None.
+
+After the function, various things should be printed on the screen. It should print which restaurants have at elast 1,3,5,7,10 reviews. It then prints out the window size for each n reviews followed by the restaurants analayzed(should be  63 for atleast windows 1 and 3), the average sentiment gap, significant discrepancies between the review's ratng and the restaurant's score, and prints the number of restaurants improving/declining/stable.
+
+Then, the main mehtod looks to see which restaurants were consistently improving and which were consistently declining. It looks at the direction key in th eresults dictionary and the sentiment gap key. Finally, it displays the top 5 consistently improving and top5 consistently declining restaurants. To show it's improving, the review windows are printed along with the sentiment gap and direction of the gap.
+
+Finally, the main saves these results with the save_detailed_results function. Save_detailed_results takes the all_results list from the main. It creates a list called rows, which contains each restaurant and review window analysis. It extracts the restaurant info and the review windows analyzed from the all_results list. The specific row copies the restaurant info and updates with the review window information. It appends the updated row to list of rows and creates a pandas Dataframe from the list, called results_df. It creates a csv file called multi_window_analysis.
+Then it creates a list called summary rows. Summary_rows captures the largest review window information for each restaurant and creates a pandas Dataframe called summary_df. Then, it creates a csv file called restaurant_summary.
+Both of these fiels are saved to the project repository for later analysis.
 
 ### References 
 #### Web-Scraping
