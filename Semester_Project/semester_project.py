@@ -1,5 +1,6 @@
 #import the libraries
 import pandas as pd
+import numpy as np
 from restaurant_sentiment_analysis import RestaurantSentimentAnalysisModel
 
 def prepare_dataset(df):
@@ -35,15 +36,15 @@ def prepare_dataset(df):
     
     return df
 
-def analyze_restaurant_trend(restaurant_df, top_n=10):
+def analyze_restaurant_trends(model, restaurant_df, top_n=10):
     """
-
     Args:
+        model: instance of the RestaurantSentimentAnalysisModel
         restaurant_df (pd.Dataframe): dataframe of a specific restaurant
         top_n (int, optional): top n reviews. Defaults to 10.
 
     Returns:
-        dict: a dictionary of 
+        dict: a dictionary of restaurant's analysis
     """
     if len(restaurant_df) < top_n:
         return None
@@ -52,8 +53,36 @@ def analyze_restaurant_trend(restaurant_df, top_n=10):
     
     # Get restaurant's totalScore
     total_score = restaurant_df['totalScore'].iloc[0] / 5.0  # Normalize to 0-1
+    # Predict sentiment for recent reviews
+    recent_predictions = model.predict(recent_reviews, return_proba=True)
     
-    return
+    # Calculate sentiment scores (positive - negative)
+    # Assuming 3-class: [negative, neutral, positive]
+    sentiment_scores = recent_predictions[:, 2] - recent_predictions[:, 0]
+    mean_sentiment = np.mean(sentiment_scores)
+    
+    # Calculate if discrepancy is significant
+    # Simple heuristic: gap > 0.15 is significant
+    sentiment_gap = mean_sentiment - total_score
+    significant = abs(sentiment_gap) > 0.15
+    
+    return {
+        'restaurant': restaurant_df['title'].iloc[0],
+        'address': restaurant_df['address'].iloc[0] if 'address' in restaurant_df.columns else '',
+        'city': restaurant_df['city'].iloc[0] if 'city' in restaurant_df.columns else '',
+        'totalScore': restaurant_df['totalScore'].iloc[0],
+        'total_score_normalized': total_score,
+        'recent_sentiment_mean': mean_sentiment,
+        'sentiment_gap': sentiment_gap,
+        'significant_discrepancy': significant,
+        'direction': 'improving' if sentiment_gap > 0.1 else 'declining' if sentiment_gap < -0.1 else 'stable',
+        'recent_review_count': len(recent_reviews),
+        'positive_ratio': np.mean(sentiment_scores > 0.2),
+        'negative_ratio': np.mean(sentiment_scores < -0.2),
+        'recent_stars_avg': recent_reviews['stars'].mean(),
+        'historical_stars_avg': restaurant_df['stars'].mean(),
+        'review_sample': recent_reviews[['text', 'stars', 'publishedAtDate']].head(3).to_dict('records')
+    }
 
 def main():
     reviews = pd.read_csv('./Dataset/Filtered_GoogleMaps_reviews.csv') #read in dataset with pandas
@@ -85,9 +114,61 @@ def main():
         restaurant_count += 1
         print(f"Processed {restaurant_count} restaurants...")
     
+    if len(restaurant_df) >= 10:  # Need enough reviews
+            analysis = analyze_restaurant_trends(individual_model, restaurant_df, top_n=10)
+            if analysis:
+                results.append(analysis)
+                
+    print(f" Analyzed {len(results)} restaurants (with over 10 reviews)")
     
-    #Save Results for further analysis
-
+    # Find restaurants with significant discrepancies
+    alerts = [r for r in results if r['significant_discrepancy']]
+    improving = [r for r in alerts if r['direction'] == 'improving']
+    declining = [r for r in alerts if r['direction'] == 'declining']
+    
+    print(f" Found {len(alerts)} restaurants with significant changes:")
+    print(f" {len(improving)} improving (recent reviews better than average)")
+    print(f" {len(declining)} declining (recent reviews worse than average)")
+    
+    #Look at the positive changes
+    positive_changes = sorted([r for r in results if r['sentiment_gap'] > 0], 
+                            key=lambda x: x['sentiment_gap'], reverse=True)[:5]
+    
+    for i, r in enumerate(positive_changes, 1):
+        print(f"\n{i}. {r['restaurant']}")
+        print(f"   Location: {r['city']}")
+        print(f"   Total Score: {r['totalScore']:.1f}/5")
+        print(f"   Recent Sentiment: {r['recent_sentiment_mean']:.2f}")
+        print(f"   Gap: +{r['sentiment_gap']:.3f} (↑ {r['direction']})")
+        print(f"   Recent Stars Avg: {r['recent_stars_avg']:.1f}/5")
+        print(f"   Historical Stars Avg: {r['historical_stars_avg']:.1f}/5")
+    
+    #Look at the negative changes
+    negative_changes = sorted([r for r in results if r['sentiment_gap'] < 0], 
+                            key=lambda x: x['sentiment_gap'])[:5]
+    
+    for i, r in enumerate(negative_changes, 1):
+        print(f"\n{i}. {r['restaurant']}")
+        print(f"   Location: {r['city']}")
+        print(f"   Total Score: {r['totalScore']:.1f}/5")
+        print(f"   Recent Sentiment: {r['recent_sentiment_mean']:.2f}")
+        print(f"   Gap: {r['sentiment_gap']:.3f} (↓ {r['direction']})")
+        print(f"   Recent Stars Avg: {r['recent_stars_avg']:.1f}/5")
+        print(f"   Historical Stars Avg: {r['historical_stars_avg']:.1f}/5")
+    
+    # Save results to CSV for further analysis
+    results_df = pd.DataFrame(results)
+    if len(results_df) > 0:
+        # Save with useful columns
+        output_cols = ['restaurant', 'city', 'totalScore', 'recent_sentiment_mean', 
+                      'sentiment_gap', 'significant_discrepancy', 'direction',
+                      'recent_review_count', 'positive_ratio', 'negative_ratio',
+                      'recent_stars_avg', 'historical_stars_avg']
+        
+        results_df[output_cols].to_csv('restaurant_sentiment_analysis.csv', index=False)
+        print(f"Results saved to 'restaurant_sentiment_analysis.csv'")
+    
+    return results
 
 if __name__ == '__main__':
     main()

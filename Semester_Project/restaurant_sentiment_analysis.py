@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import pandas as pd
 import numpy as np
+import transformers
 from transformers import DistilBertModel, DistilBertTokenizer
 import lightgbm as lgb
+import sklearn
 from sklearn.model_selection import train_test_split
 from datetime import datetime
 import warnings
@@ -215,12 +217,138 @@ class RestaurantSentimentAnalysisModel:
         self._create_feature_names(all_features.shape[1], text_embeddings.shape[1])
         return all_features
 
-    def train_model(model, trainloader):
+    def train_model(self, df, test_size=0.2, random_state=42):
         """
         Train the model based on the review
         (text, original(if available), and text translated(if it's available with original)) 
         and star associated with review
+        
+        Args:
+            df (pd Dataframe): a pandas Dataframe of a restaurant and its reviews
+            test_size (float or int, optional): the size of dataset split
+            random_state (int, optional): the random seed for splitting dataframe
+
+        Returns:
+            dictionary: a dictionary containing all the features of a restaurant
+        
         """
-        return
-    def predict():
-        return 
+        # Create labels from star ratings if needed
+        if 'sentiment' not in df.columns:
+            # Convert stars to sentiment classes
+            # 1-2 stars: negative (0), 3 stars: neutral (1), 4-5 stars: positive (2)
+            df['sentiment'] = pd.cut(df['star'], 
+                                     bins=[0, 2, 3, 5], 
+                                     labels=[0, 1, 2], 
+                                     right=True).astype(int)
+        
+        # Extract features
+        X = self.extract_features(df)
+        y = df['sentiment'].values
+        
+        # Split data
+        X_train, X_val, y_train, y_val = train_test_split(
+            X, y, test_size=test_size, random_state=random_state, stratify=y
+        )
+        
+        # LightGBM parameters optimized for sentiment analysis
+        params = {
+            'objective': 'multiclass',
+            'num_class': 3,
+            'metric': 'multi_logloss',
+            'boosting_type': 'gbdt',
+            'num_leaves': 31,
+            'learning_rate': 0.05,
+            'feature_fraction': 0.9,
+            'bagging_fraction': 0.8,
+            'bagging_freq': 5,
+            'verbose': -1,
+            'num_threads': 4,
+            'max_depth': 7,
+            'min_data_in_leaf': 20,
+            'reg_alpha': 0.1,
+            'reg_lambda': 0.1,
+        }
+        
+        # Train LightGBM
+        train_data = lgb.Dataset(X_train, label=y_train)
+        val_data = lgb.Dataset(X_val, label=y_val, reference=train_data)
+        
+        self.lgb_model = lgb.train(
+            params,
+            train_data,
+            num_boost_round=500,
+            valid_sets=[train_data, val_data],
+            callbacks=[
+                lgb.early_stopping(stopping_rounds=30),
+                lgb.log_evaluation(period=100)
+            ]
+        )
+        
+        # Evaluate
+        train_pred = np.argmax(self.lgb_model.predict(X_train), axis=1)
+        val_pred = np.argmax(self.lgb_model.predict(X_val), axis=1)
+        
+        train_acc = np.mean(train_pred == y_train)
+        val_acc = np.mean(val_pred == y_val)
+        
+        print(f"Training accuracy: {train_acc:.3f}")
+        print(f"Validation accuracy: {val_acc:.3f}")
+        
+        return self.lgb_model
+
+    def predict(self,df, return_prob=False):
+        """
+        Predicts the sentiment of new reviews
+        Args:
+            df (): 
+            return_prob (bool, optional): indicates whether or not to return the probabilities. Defaults to False.
+        """
+        #Check to see if the model was trained
+        if self.lgb_model is None:
+            raise ValueError("Model must be trained before prediction")
+        
+        # Extract features
+        X = self.extract_features(df)
+        
+        # Check cache if enabled
+        if self.use_caching and self.cache is not None:
+            cache_key = self._create_cache_key(df)
+            if cache_key in self.cache:
+                return self.cache[cache_key]
+        
+        # Make predictions
+        if return_prob:
+            predictions = self.lgb_model.predict(X)
+        else:
+            predictions = np.argmax(self.lgb_model.predict(X), axis=1)
+        
+        # Store in cache if enabled
+        if self.use_caching and self.cache is not None:
+            self.cache[cache_key] = predictions
+            # Manage cache size
+            if len(self.cache) > self.cache_size:
+                # Remove oldest entry
+                self.cache.pop(next(iter(self.cache)))
+        
+        return predictions
+
+    def _create_cache_key(self, df):
+        """Create cache key from dataframe content"""
+        # Use hash of concatenated text and ratings
+        texts = df['text'].fillna('') + df['translatedLanguage'].fillna('')
+        ratings = df['star'].astype(str) + df['totalScore'].astype(str)
+        key_str = ''.join(texts) + ''.join(ratings)
+        return hash(key_str)
+    
+    def get_feature_importance(self, top_n=20):
+        """Get feature importance for interpretability"""
+        if self.lgb_model is None:
+            raise ValueError("Model not trained")
+        
+        importance = self.lgb_model.feature_importance(importance_type='gain')
+        
+        # Create sorted list
+        features_with_importance = list(zip(self.feature_names, importance))
+        features_with_importance.sort(key=lambda x: x[1], reverse=True)
+        
+        return features_with_importance[:top_n]
