@@ -340,11 +340,11 @@ class RestaurantSentimentAnalysisModel:
         """
         Evaluation model (I forgot to add this initially)
         """
+        df_train, df_test = train_test_split(df, test_size=test_size, stratify=df['sentiment'])
         if model.lgb_model is None:
             print("Training model...")
-            model.train(df_train)
-        df_train, df_test = train_test_split(df, test_size=test_size, stratify=df['sentiment'])
-        
+            model.train_model(df_train)
+            
         y_test = df_test['sentiment'].values
         try:
             y_pred = model.predict(df_test)  # Class predictions (0, 1, 2)

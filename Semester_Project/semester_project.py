@@ -196,8 +196,6 @@ def main():
     
     #Train the sentiment model
     individual_model = RestaurantSentimentAnalysisModel(use_restaurant_features=True)
-    individual_model.train_model(df)
-    
     eval_results = individual_model.evaluate_model(df, test_size=0.2)
     
     # Show feature importance

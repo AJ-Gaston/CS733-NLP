@@ -62,13 +62,25 @@ Then trends are calculated. If the sentiment gap is greater than 0.1, it means t
 The result fo the review window is saved in a dictionary that contains all of these trends, which is then appened to the results list created at the beginning of the function.
 If the results has review window analysis, then it returns a dictionary with the restaurant's title, address, total score, total reviews, window analysis, and other features. If there was no window analysis, then it returns None.
 
-After the function, various things should be printed on the screen. It should print which restaurants have at elast 1,3,5,7,10 reviews. It then prints out the window size for each n reviews followed by the restaurants analayzed(should be  63 for atleast windows 1 and 3), the average sentiment gap, significant discrepancies between the review's ratng and the restaurant's score, and prints the number of restaurants improving/declining/stable.
+After the function, various things should be printed on the screen. It should print which restaurants have at least 1,3,5,7,10 reviews. It then prints out the window size for each n reviews followed by the restaurants analayzed(should be  63 for atleast windows 1 and 3), the average sentiment gap, significant discrepancies between the review's ratng and the restaurant's score, and prints the number of restaurants improving/declining/stable.
 
-Then, the main mehtod looks to see which restaurants were consistently improving and which were consistently declining. It looks at the direction key in th eresults dictionary and the sentiment gap key. Finally, it displays the top 5 consistently improving and top5 consistently declining restaurants. To show it's improving, the review windows are printed along with the sentiment gap and direction of the gap.
+Then, the main method looks to see which restaurants were consistently improving and which were consistently declining. It looks at the direction key in th eresults dictionary and the sentiment gap key. Finally, it displays the top 5 consistently improving. To show it's improving, the review windows are printed along with the sentiment gap and direction of the gap.
 
 Finally, the main saves these results with the save_detailed_results function. Save_detailed_results takes the all_results list from the main. It creates a list called rows, which contains each restaurant and review window analysis. It extracts the restaurant info and the review windows analyzed from the all_results list. The specific row copies the restaurant info and updates with the review window information. It appends the updated row to list of rows and creates a pandas Dataframe from the list, called results_df. It creates a csv file called multi_window_analysis.
 Then it creates a list called summary rows. Summary_rows captures the largest review window information for each restaurant and creates a pandas Dataframe called summary_df. Then, it creates a csv file called restaurant_summary.
-Both of these fiels are saved to the project repository for later analysis.
+Both of these fields are saved to the project repository for later analysis.
+
+## GUI
+For this part, I separated created a separate file. This file creates Guided User Interface, or GUI, with tkinter library. 
+In this I created three functions in the initialization: setup_style, setup_GUI, and load_data. The setup_style is where I create the fonts and colors for the GUI window. 
+The setup_GUI is where I create the various frames,labels and buttons for the GUI. I create multiple frames, each of which show their own area. This is to make it easier for the user to see the restaurants, review window, total score, sentiment, and direction of sentiment.
+The load data is where the class loads the csv file. While it does import from semester_project and restaurant_sentiment_analysis, it checks to see if it's available as its own functionality. 
+
+The window is created, but the user is unable to select anything until the model has successfully trained. Once it has, the user can select any restaurant and any review window that restaurant has. Then, they click the Analyze Button to the right of the screen. It looks white until the mouse hovers over the button, which causes the text 'Analyze' to appear.
+The user can look at any review window because of the clear_results function that removes the text on the window.
+The window display also uses unicode/text images. This is to make it more intepretable for the user.
+
+Throughout this file, I'm using threading. The reason why is because my GUI intially froze my computer and mouse with the training. I tried to find a few ways to resolve this and threading was the best option at the time.
 
 ### References 
 #### Web-Scraping
@@ -88,3 +100,8 @@ https://lightgbm.readthedocs.io/en/stable/Python-Intro.html
 https://lightgbm.readthedocs.io/en/stable/Parameters.html
 https://lightgbm.readthedocs.io/en/stable/Parameters-Tuning.html
 https://tdtapas.medium.com/sentiment-analysis-using-lightgbm-alternative-approach-to-rnn-and-lstm-55ee6f32e066
+
+#### Tkinter
+https://youtu.be/TuLxsvK4svQ?si=eYGamdDKLiIwHthd
+https://youtu.be/YXPyB4XeYLA?si=gQsU7zzNNBKWA6xO
+https://stackoverflow.com/questions/41371815/how-can-i-stop-my-tkinter-gui-from-freezing-when-i-click-my-button
