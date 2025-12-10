@@ -1,118 +1,45 @@
 import torch
 import torch.nn as nn
-import numpy as np
-from transformers import DistilBertTokenizer, DistilBertModel
 import pandas as pd
+import numpy as np
+from transformers import DistilBertModel, DistilBertTokenizer
+import lightgbm as lgb
+from sklearn.model_selection import train_test_split
+from datetime import datetime
+import warnings
 
 class RestaurantSentimentAnalysisModel:
-    def __init__(self,model_name='distilbert-base-multilingual-cased'):
-        self.text_model = DistilBertModel.from_pretrained(model_name)
-        self.tokenizer = DistilBertTokenizer.from_pretrained(model_name)
+    """
+    Sentiment Analysis Model for restaurant reviews
+    Handles: text (multilingual), ratings, dates, missing data
+    """
+    def __init__(self, text_model_name='distilbert-base-multilingual-cased',
+                 use_restaurant_features=True,
+                 use_caching=False,
+                 cache_size=1000):
+        
+        self.text_model = DistilBertModel.from_pretrained(text_model_name)
+        self.tokenizer = DistilBertTokenizer.from_pretrained(text_model_name)
+        
+        # LightGBM model (will be trained)
         self.lgb_model = None
-        self.feature_names = None
-
-    def _extract_features(self, df, batch_size=32):
-        """
-        Extract features from the dataframe
-        The review text(translated if it's not in English), category, star rating
-        Args:
-            df (pd Series): the dataframe containing the reviews
-            batch_size (int, optional): number of batches for the model. Defaults to 32.
-
-        Returns:
-            dictionary: contians all the features of a restaurant's dataframe
-        """
-        #TEXT EMBEDDINGS OF DATAFRAME
-        # Get the original text embeddings
-        original_texts = df['text'].fillna('[NO TEXT]').tolist()
-        original_embeddings = self._get_text_embeddings(original_texts, batch_size)
         
-        # Get the translated text embeddings
-        translated_texts = df['translatedLanguage'].fillna('[NO TRANSLATION]').tolist()
-        translated_embeddings = self._get_text_embeddings(translated_texts, batch_size)
+        self.feature_names = []
         
-        #TEXT QUALITY INDICATORS OF REVIEWS
-        has_original_text = df['text'].notna().astype(int).values.reshape(-1, 1)
-        has_translated_text = df['translatedLanguage'].notna().astype(int).values.reshape(-1, 1)
+        self.use_restaurant_features = use_restaurant_features
+        self.use_caching = use_caching
+        self.cache = {} if use_caching else None
+        self.cache_size = cache_size
         
-        # Text length (more sophisticated)
-        combined_text = df['translatedLanguage'].fillna(df['text'])
-        #Reshape the text length and word count of the combined text
-        text_length = combined_text.str.len().fillna(0).values.reshape(-1, 1)
-        word_count = combined_text.str.split().str.len().fillna(0).values.reshape(-1, 1)
-        
-        # Emotional intensity indicators (Exclamation point and quesiton marks are a good indicator)
-        has_exclamation = combined_text.str.contains('!').astype(int).values.reshape(-1, 1)
-        has_question = combined_text.str.contains(r'\?').astype(int).values.reshape(-1, 1)
-       
-        #Numerical Features (specifically RATINGS)
-        # Core ratings (normalized)
-        star_norm = (df['stars'] / 5.0).values.reshape(-1, 1)
-        total_score_norm = (df['totalScore'] / 5.0).values.reshape(-1, 1)
-        
-        # MOST IMPORTANT: Rating discrepancy (the actual review - the customer's review)
-        discrepancy = ((df['totalScore'] - df['stars']) / 5.0).values.reshape(-1, 1)
-        
-        #Time features
-        df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate']) #Convert to datetime if it's not already converted
-        #Look at the year, month, and day, normalize them to between 0-1 and reshape them to a column vector
-        year_norm = (df['publishedAtDate'].dt.year / 2024.0).values.reshape(-1, 1) #Get year
-        month_norm = (df['publishedAtDate'].dt.month / 12.0).values.reshape(-1, 1)
-        day_of_week = (df['publishedAtDate'].dt.dayofweek / 6.0).values.reshape(-1, 1)
-        is_weekend = df['publishedAtDate'].dt.dayofweek.isin([5, 6]).astype(int).values.reshape(-1, 1) #check to see if it was a weekend
-       
-        #Language features
-        df['language'] = df['language'].fillna('unknown')
-        language_major = df['language'].isin(['en', 'es', 'fr', 'de', 'zh', 'kr', 'it']).astype(int).values.reshape(-1, 1)
-        is_english = (df['language'] == 'en').astype(int).values.reshape(-1, 1)
-        
-        #Make a numerical feature matrix  using np.column_stack
-        numerical_features = np.column_stack([
-        star_norm,           # Individual rating
-        total_score_norm,    # Restaurant average
-        discrepancy,         # Difference (GOLDEN feature)
-        year_norm,           # Year
-        month_norm,          # Month
-        day_of_week,         # Day of week
-        is_weekend,          # Weekend flag
-        language_major,      # Common language
-        is_english           # English flag
-        ])
-        
-        # Combine ALL features using np.hstack()
-        all_features = np.hstack([
-            original_embeddings,     # 768 dim: Original text semantics
-            translated_embeddings,   # 768 dim: Translated text semantics
-            has_original_text,           # 1 dim: Has original text
-            has_translated_text,         # 1 dim: Has translation
-            text_length,            # 1 dim: Character count
-            word_count,             # 1 dim: Word count
-            has_exclamation,        # 1 dim: Emotional intensity
-            has_question,           # 1 dim: Question indicator
-            numerical_features      # 9 dim: All numerical features
-        ])
-        
-        #Create feature names just for checking
-        self.feature_names = (
-        [f'orig_emb_{i}' for i in range(768)] +
-        [f'trans_emb_{i}' for i in range(768)] +
-        ['has_original', 'has_translated', 'text_length', 'word_count', 
-         'has_exclamation', 'has_question'] +
-        ['star_norm', 'total_score_norm', 'rating_discrepancy', 'year_norm',
-         'month_norm', 'day_of_week', 'is_weekend', 'language_major', 'is_english']
-        )
-       
-        #This is used to see if everything works(will comment out later)
-        print(f"Feature dimensions:")
-        print(f"  Original embeddings: {original_embeddings.shape[1]}")
-        print(f"  Translated embeddings: {translated_embeddings.shape[1]}")
-        print(f"  Text quality: 6 features")
-        print(f"  Numerical: {numerical_features.shape[1]} features")
-        print(f"  TOTAL: {all_features.shape[1]} features")
-        return all_features
+        # Freeze DistilBERT (only use it for embeddings, not fine-tuning)
+        for param in self.text_encoder.parameters():
+            param.requires_grad = False
+        self.text_encoder.eval()
     
     def _get_text_embeddings(self, texts, batch_size=32):
-        """Get CLS token embeddings from DistilBERT"""
+        """Extract embeddings from text using DistilBERT"""
+        if not texts:
+            return np.zeros((0, 768))
         embeddings = []
         
         #Process the text embedding in batches
@@ -135,9 +62,159 @@ class RestaurantSentimentAnalysisModel:
                 batch_embeddings = outputs.last_hidden_state[:, 0, :].numpy()
                 embeddings.append(batch_embeddings)
         
-        # Combine all batches using numpy's vstack()
-        return np.vstack(embeddings)  # Returns shape: [num_samples, 768]
+        # Combine all batches using numpy's vstack() if the embeddings exist
+        # Else create an empty numpy array  of shape (the length of texts, 768)
+        return np.vstack(embeddings) if embeddings else np.zeros((len(texts),768))
     
+    def _extract_temporal_features(self, df):
+        """
+        Extract features from the dataframe
+        The review text(translated if it's not in English), category, star rating
+        Args:
+            df (pd Series): the dataframe containing the reviews
+            batch_size (int, optional): number of batches for the model. Defaults to 32.
+
+        Returns:
+            dictionary: contians all the features of a restaurant's dataframe
+        """
+        #Ensure that the publishedAtDate is datetime format
+        df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], errors='coerce')
+        #Look at the year, month, and day, normalize them to between 0-1 and reshape them to a column vector
+        current_year = datetime.now().year #Get the current year (2025)
+        year_norm = (df['publishedAtDate'].dt.year / current_year).fillna(0.5).values()
+        
+        #Month -cyclic encoding
+        month_rad = 2 * np.pi * df['publishedAtDate'].dt.month.fillna(6) / 12
+        month_sin = np.sin(month_rad).values
+        month_cos = np.cos(month_rad).values
+        
+        #Day of the week and weekend
+        day_of_week = (df['publishedAtDate'].dt.dayofweek.fillna(3) / 6.0).values
+        is_weekend = df['publishedAtDate'].dt.dayofweek.isin([5, 6]).fillna(False).astype(int).values #check to see if it was a weekend
+        
+        #Return the temporal features using np.column_stack
+        return np.column_stack([year_norm, month_sin, month_cos, day_of_week, is_weekend])
+    
+    def _create_feature_names(self, total_features, embedding_dim):
+        """
+        Creates descriptive feature names (Good for interpretability)
+        """
+        self.feature_names = []
+        
+        #Text Embedding Names
+        self.feature_names.extend([f'text_emb_{i}' for i in range(embedding_dim)])
+        
+        #Core features (star rating, total socre rating, rating discrepancy)
+        core_names = ['star_norm', 'total_score_norm', 'rating_discrepancy']
+        self.feature_names.extend(core_names)
+        
+        # Temporal features
+        temporal_names = ['year_norm', 'month_sin', 'month_cos', 'day_of_week', 'is_weekend']
+        self.feature_names.extend(temporal_names)
+        
+        # Text metadata
+        meta_names = ['has_original', 'has_translation', 'is_english', 
+                     'text_length', 'word_count', 'text_source']
+        self.feature_names.extend(meta_names)
+        
+        # Restaurant features
+        if self.use_restaurant_features:
+            restaurant_names = ['recency', 'has_exclamation', 'has_question']
+            self.feature_names.extend(restaurant_names)
+        
+        # Ensure length matches
+        if len(self.feature_names) != total_features:
+            # Fill remaining with generic names
+            for i in range(len(self.feature_names), total_features):
+                self.feature_names.append(f'feature_{i}')
+                
+    def extract_features(self, df):
+        """
+        Extract all features from restaurant review dataframe
+        df should contain: text, translatedLanguage, star, totalScore, 
+                          publishedAtDate, originalLanguage, and title
+        Args:
+            df (pd Dataframe): a pandas Dataframe of a restaurant and its reviews
+
+        Returns:
+            dictionary: a dictionary containing all the features of a restaurant
+        """
+        texts_to_embed = []
+        text_source_flags = []
+        
+        for _, row in df.iterrows():
+            #Use translation if available and original is not English
+            if (pd.notna(row.get('translatedLanguage')) and 
+                str(row.get('originalLanguage', '')).lower() != 'en'):
+                texts_to_embed.append(row['translatedLanguage'])
+                text_source_flags.append(0)  # Translated
+            elif pd.notna(row.get('text')):
+                texts_to_embed.append(row['text'])
+                text_source_flags.append(1)  # Get the original review
+            else:
+                texts_to_embed.append('[NO TEXT]')
+                text_source_flags.append(2)  # Missing review text
+        
+        # Text embeddings of the reviews
+        text_embeddings = self._get_text_embeddings(texts_to_embed)
+        
+        # Numerical Features (review star rating and restaurant's total score rating
+        star_norm = (df['star'] / 5.0).fillna(0.5).values.reshape(-1, 1)
+        total_score_norm = (df['totalScore'] / 5.0).fillna(0.5).values.reshape(-1, 1)
+        
+        # Rating discrepancy between the reviewer's and the restaurant
+        rating_discrepancy = (df['totalScore'] - df['star']).fillna(0).values.reshape(-1, 1) / 5.0
+        
+        # Temporal features
+        temporal_features = self._extract_temporal_features(df)
+        
+        # Text Metadata (original review, translated review, and is it english)
+        has_original = df['text'].notna().astype(int).values.reshape(-1, 1)
+        has_translation = df['translatedLanguage'].notna().astype(int).values.reshape(-1, 1)
+        is_english = df['originalLanguage'].fillna('').str.lower().eq('en').astype(int).values.reshape(-1, 1)
+        
+        #Text quality features (length of review and word count)
+        text_length = pd.Series(texts_to_embed).str.len().fillna(0).values.reshape(-1, 1)
+        word_count = pd.Series(texts_to_embed).str.split().str.len().fillna(0).values.reshape(-1, 1)
+        
+        #Restaurant's specific features
+        restaurant_features = np.empty((len(df), 0)) #create an empty ndarray [df length,0]
+        if self.use_restaurant_features:
+            # Review recency (inverse of days ago)
+            if 'publishedAtDate' in df.columns:
+                df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], errors='coerce')
+                days_ago = (pd.Timestamp.now() - df['publishedAtDate']).dt.days.fillna(365)
+                recency = 1 / (1 + days_ago / 30)  # Decay over months
+                recency = recency.values.reshape(-1, 1)
+            else:
+                recency = np.ones((len(df), 1))
+            
+            # Emotional intensity indicators
+            texts_series = pd.Series(texts_to_embed)
+            has_exclamation = texts_series.str.contains('!').astype(int).values.reshape(-1, 1)
+            has_question = texts_series.str.contains(r'\?').astype(int).values.reshape(-1, 1)
+            
+            restaurant_features = np.column_stack([recency, has_exclamation, has_question])
+        # 8. Combine all features
+        all_features = np.hstack([
+            text_embeddings,            # Text semantics (768 dim)
+            star_norm,                  # Individual rating
+            total_score_norm,           # Restaurant average score
+            rating_discrepancy,         # IMPORTANT!!!!
+            temporal_features,          # Date features (5 dim)
+            has_original,               # Text presence flags
+            has_translation,
+            is_english,
+            text_length,                # Text quality
+            word_count,
+            text_source_flags,          # 0=translated, 1=original, 2=missing
+            restaurant_features         # Optional restaurant features
+        ])
+        
+        # Create feature names for interpretability 
+        self._create_feature_names(all_features.shape[1], text_embeddings.shape[1])
+        return all_features
+
     def train_model(model, trainloader):
         """
         Train the model based on the review
