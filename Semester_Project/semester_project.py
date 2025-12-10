@@ -26,6 +26,7 @@ def prepare_dataset(df):
     
     # 2. Handle dates
     df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], format='ISO8601')
+    df['publishedAtDate'] = df['publishedAtDate'].dt.tz_localize(None)  # Remove timezone   
     
     #Fill in missing reviews
     df['text'] = df['text'].fillna('[NO_TEXT]')
@@ -54,7 +55,7 @@ def analyze_restaurant_trends(model, restaurant_df, top_n=10):
     # Get restaurant's totalScore
     total_score = restaurant_df['totalScore'].iloc[0] / 5.0  # Normalize to 0-1
     # Predict sentiment for recent reviews
-    recent_predictions = model.predict(recent_reviews, return_proba=True)
+    recent_predictions = model.predict(recent_reviews, return_prob=True)
     
     # Calculate sentiment scores (positive - negative)
     # Assuming 3-class: [negative, neutral, positive]
@@ -110,7 +111,7 @@ def main():
     
     results = []
     restaurant_count = 0
-    for restaurant_name, restaurant_df in df.groupby('restaurant'):
+    for restaurant_name, restaurant_df in df.groupby('title'):
         restaurant_count += 1
         print(f"Processed {restaurant_count} restaurants...")
     

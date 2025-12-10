@@ -83,7 +83,7 @@ class RestaurantSentimentAnalysisModel:
         df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], errors='coerce')
         #Look at the year, month, and day, normalize them to between 0-1 and reshape them to a column vector
         current_year = datetime.now().year #Get the current year (2025)
-        year_norm = (df['publishedAtDate'].dt.year / current_year).fillna(0.5).values()
+        year_norm = (df['publishedAtDate'].dt.year / current_year).fillna(0.5).values
         
         #Month -cyclic encoding
         month_rad = 2 * np.pi * df['publishedAtDate'].dt.month.fillna(6) / 12
@@ -160,12 +160,15 @@ class RestaurantSentimentAnalysisModel:
         # Text embeddings of the reviews
         text_embeddings = self._get_text_embeddings(texts_to_embed)
         
+        #Forgot to reshape the text_embeddings (cause an issue with np.hstack())
+        text_source_flags_array = np.array(text_source_flags).reshape(-1, 1)
+        
         # Numerical Features (review star rating and restaurant's total score rating
-        star_norm = (df['star'] / 5.0).fillna(0.5).values.reshape(-1, 1)
+        star_norm = (df['stars'] / 5.0).fillna(0.5).values.reshape(-1, 1)
         total_score_norm = (df['totalScore'] / 5.0).fillna(0.5).values.reshape(-1, 1)
         
         # Rating discrepancy between the reviewer's and the restaurant
-        rating_discrepancy = (df['totalScore'] - df['star']).fillna(0).values.reshape(-1, 1) / 5.0
+        rating_discrepancy = (df['totalScore'] - df['stars']).fillna(0).values.reshape(-1, 1) / 5.0
         
         # Temporal features
         temporal_features = self._extract_temporal_features(df)
@@ -197,7 +200,7 @@ class RestaurantSentimentAnalysisModel:
             has_question = texts_series.str.contains(r'\?').astype(int).values.reshape(-1, 1)
             
             restaurant_features = np.column_stack([recency, has_exclamation, has_question])
-        # 8. Combine all features
+        # Combine all features
         all_features = np.hstack([
             text_embeddings,            # Text semantics (768 dim)
             star_norm,                  # Individual rating
@@ -209,7 +212,7 @@ class RestaurantSentimentAnalysisModel:
             is_english,
             text_length,                # Text quality
             word_count,
-            text_source_flags,          # 0=translated, 1=original, 2=missing
+            text_source_flags_array,    # 0=translated, 1=original, 2=missing (Wasn't the right shape originally)
             restaurant_features         # Optional restaurant features
         ])
         
@@ -236,7 +239,7 @@ class RestaurantSentimentAnalysisModel:
         if 'sentiment' not in df.columns:
             # Convert stars to sentiment classes
             # 1-2 stars: negative (0), 3 stars: neutral (1), 4-5 stars: positive (2)
-            df['sentiment'] = pd.cut(df['star'], 
+            df['sentiment'] = pd.cut(df['stars'], 
                                      bins=[0, 2, 3, 5], 
                                      labels=[0, 1, 2], 
                                      right=True).astype(int)
@@ -336,7 +339,7 @@ class RestaurantSentimentAnalysisModel:
         """Create cache key from dataframe content"""
         # Use hash of concatenated text and ratings
         texts = df['text'].fillna('') + df['translatedLanguage'].fillna('')
-        ratings = df['star'].astype(str) + df['totalScore'].astype(str)
+        ratings = df['stars'].astype(str) + df['totalScore'].astype(str)
         key_str = ''.join(texts) + ''.join(ratings)
         return hash(key_str)
     
