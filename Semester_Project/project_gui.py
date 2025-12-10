@@ -78,6 +78,16 @@ class RestaurantSentimentGUI:
         #Bind the dropdown menu
         self.restaurant_dropdown.bind('<<ComboboxSelected>>', self.on_restaurant_selected)
         
+        # Review Window Selection (inside the control frame)
+        Label(control_frame, text="Review Window:", font=self.fonts['heading'], 
+              bg=self.colors['card']).grid(row=0, column=2, padx=10, pady=10, sticky=W)
+        #Make it an int instead of string
+        self.window_var = IntVar()
+        #Make another dropdown menu (this time for the review windows)
+        self.window_dropdown = ttk.Combobox(control_frame, textvariable=self.window_var, 
+                                            width=15, state="readonly")
+        self.window_dropdown.grid(row=0, column=3, padx=10, pady=10)
+        self.window_dropdown.bind('<<ComboboxSelected>>', self.on_window_selected)
         
     def load_data(self):
         """
