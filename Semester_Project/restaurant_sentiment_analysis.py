@@ -20,7 +20,7 @@ class RestaurantSentimentAnalysisModel:
                  use_caching=False,
                  cache_size=1000):
         
-        self.text_model = DistilBertModel.from_pretrained(text_model_name)
+        self.text_encoder = DistilBertModel.from_pretrained(text_model_name)
         self.tokenizer = DistilBertTokenizer.from_pretrained(text_model_name)
         
         # LightGBM model (will be trained)

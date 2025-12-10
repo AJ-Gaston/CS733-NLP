@@ -9,7 +9,7 @@ def prepare_dataset(df):
         A nested function that converts star ratings to sentiment
         Args:
             star (int): review rating of a restaurant
-
+            
         Returns:
             int: sentiment of star rating
         """
@@ -25,11 +25,11 @@ def prepare_dataset(df):
     df['sentiment'] = df['stars'].apply(star_to_sentiment)
     
     # 2. Handle dates
-    df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'])
+    df['publishedAtDate'] = pd.to_datetime(df['publishedAtDate'], format='ISO8601')
     
     #Fill in missing reviews
     df['text'] = df['text'].fillna('[NO_TEXT]')
-    df['translatedText'] = df['translatedText'].fillna('[NO_TEXT]')
+    df['textTranslated'] = df['textTranslated'].fillna('[NO_TEXT]')
     
     # 4. Language encoding (for metadata features, not text)
     df['Language'] = df['language'].fillna('unknown')
@@ -95,13 +95,13 @@ def main():
     
     print(f"After preprocessing:")
     print(f"- Total reviews: {len(df)}")
-    print(f"- Unique restaurants: {df['restaurant'].nunique()}")
+    print(f"- Unique restaurants: {df['title'].nunique()}")
     print(f"- Date range: {df['publishedAtDate'].min()} to {df['publishedAtDate'].max()}")
     print(f"- Sentiment distribution: {dict(df['sentiment'].value_counts().sort_index())}")
     
     #Train the sentiment model
     individual_model = RestaurantSentimentAnalysisModel(use_restaurant_features=True)
-    individual_model.train(df)
+    individual_model.train_model(df)
     
     # Show feature importance
     print("\nTop 10 most important features:")
