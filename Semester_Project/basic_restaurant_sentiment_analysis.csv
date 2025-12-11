@@ -1,2 +1,0 @@
-restaurant,city,totalScore,recent_sentiment_mean,sentiment_gap,significant_discrepancy,direction,recent_review_count,positive_ratio,negative_ratio,recent_stars_avg,historical_stars_avg
-Wingstop,Virginia Beach,3.4,0.20002746702563515,-0.4799725329743648,True,declining,10,0.6,0.4,3.2,2.993333333333333

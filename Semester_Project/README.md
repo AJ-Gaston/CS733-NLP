@@ -10,6 +10,8 @@ For this portion I used Apify's Google Maps Review Scraper and created a csv fil
  
 I cleaned the csv file using OpenRefine, a software previously used in CS 625 to clean datasets of information such as unneeded columns, re-ordering columns to format I like, or filling in null/nan data.
 
+Afterwards, I ran exploratory data analysis on the collected reviews to see the what was I working with using jupyer notebook. This file is called dataset_EDA.ipynb.
+
 ### 2. Model Implementation
 For this model, I decided to use DistilBert with LightGBM instead of GloVE pre-trained, which would have been sent into bert-base-multilingual-uncased-sentiment.
 
@@ -68,7 +70,8 @@ Then, the main method looks to see which restaurants were consistently improving
 
 Finally, the main saves these results with the save_detailed_results function. Save_detailed_results takes the all_results list from the main. It creates a list called rows, which contains each restaurant and review window analysis. It extracts the restaurant info and the review windows analyzed from the all_results list. The specific row copies the restaurant info and updates with the review window information. It appends the updated row to list of rows and creates a pandas Dataframe from the list, called results_df. It creates a csv file called multi_window_analysis.
 Then it creates a list called summary rows. Summary_rows captures the largest review window information for each restaurant and creates a pandas Dataframe called summary_df. Then, it creates a csv file called restaurant_summary.
-Both of these fields are saved to the project repository for later analysis.
+Both of these fields are saved to the project repository for later analysis. I saved them to the model_created_files for simplicity.
+
 
 ## GUI
 For this part, I separated created a separate file. This file creates Guided User Interface, or GUI, with tkinter library. 
