@@ -1,9 +1,9 @@
 # CS 733 Semester Project
 
-## Author: Alejxi Gaston
+## Author: Alexji Gaston
 
 ## Project
-GITHUB LINK FOR PROJECT REPOSITORY:
+GITHUB LINK FOR PROJECT REPOSITORY: https://github.com/AJ-Gaston/CS733-NLP/tree/main/Semester_Project
 
 ### 1. Web-scraping
 For this portion I used Apify's Google Maps Review Scraper and created a csv file instead of json due to the way that Apify's Scraper works. Apify allows exporting these reviews as a .json file or a .csv file. I chose a .csv file or easier manipulation.
